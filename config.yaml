@@ -1,0 +1,26 @@
+ingestion:
+  sources_dir: "Personal Files"
+  output_dir: "data/chunks"
+  output_file: "chunks.jsonl"
+  supported_extensions: [".md", ".txt", ".pdf", ".docx"]
+  chunk_size: 400          # tokens
+  chunk_overlap: 50        # tokens
+  min_chunk_length: 50     # characters — skip tiny fragments
+
+embedding:
+  model: "all-MiniLM-L6-v2"   # free, local
+  batch_size: 64
+
+vector_store:
+  type: "chroma"
+  persist_dir: "db/chroma"
+  collection_name: "personal_docs"
+
+llm:
+  provider: "groq"             # groq (free) | openai | ollama
+  model: "llama-3.1-8b-instant"
+  temperature: 0.1
+  max_tokens: 1024
+
+retrieval:
+  top_k: 5
