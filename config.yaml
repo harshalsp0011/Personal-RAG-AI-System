@@ -12,9 +12,13 @@ embedding:
   batch_size: 64
 
 vector_store:
-  type: "chroma"
-  persist_dir: "db/chroma"
-  collection_name: "personal_docs"
+  type: "pinecone"
+  index_name: "personal-rag"
+  cloud: "aws"
+  region: "us-east-1"          # free tier region
+  dimension: 384               # matches all-MiniLM-L6-v2 output
+  metric: "cosine"
+  namespace: "personal_docs"
 
 llm:
   provider: "groq"             # groq (free) | openai | ollama

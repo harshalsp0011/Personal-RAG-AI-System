@@ -1,6 +1,6 @@
 # Phase 1 — Ingestion
 sentence-transformers==3.3.1
-chromadb==0.6.3
+pinecone==6.0.2
 pymupdf==1.25.5
 python-docx==1.1.2
 langchain==0.3.25

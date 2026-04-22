@@ -22,23 +22,34 @@
 ---
 
 ## Phase 2 — Embedding + Vector Store
-- [ ] Install `sentence-transformers`, `chromadb`
-- [ ] Build `src/embed_and_index.py`
-- [ ] Load chunks from `chunks.jsonl`
-- [ ] Embed with `all-MiniLM-L6-v2` (local, free)
-- [ ] Store vectors + metadata in Chroma (`db/chroma/`)
-- [ ] Run first semantic search query
+- [x] Switched vector store from Chroma → **Pinecone** (free serverless tier)
+- [x] Updated `config.yaml` — Pinecone index config (aws/us-east-1, cosine, dim=384)
+- [x] Updated `.env.example` — added `PINECONE_API_KEY`
+- [x] Updated `.gitignore` — removed `db/` entry (no local vector store anymore)
+- [x] Installed `sentence-transformers`, `pinecone`, `python-dotenv` into venv
+- [x] Built `src/embed_and_index.py`
+  - [x] Loads chunks from `chunks.jsonl`
+  - [x] Embeds with `all-MiniLM-L6-v2` (local, free, 384-dim)
+  - [x] Creates Pinecone serverless index if not exists
+  - [x] Upserts vectors + metadata in batches
+  - [x] Runs 3 test queries after indexing to validate retrieval
+- [x] Created `.env` with `PINECONE_API_KEY` and `GROQ_API_KEY`
+- [x] Ran `embed_and_index.py` — 15 vectors upserted into Pinecone index `personal-rag`
+- [x] Validated retrieval with 3 test queries — semantic search returning correct results
 
 ---
 
 ## Phase 3 — RAG API
-- [ ] Build `src/rag_api.py` (FastAPI)
-- [ ] `POST /ask` — embed query → retrieve → prompt → LLM → answer + citations
-- [ ] `POST /ingest` — add new docs at runtime
-- [ ] `GET /search` — raw chunk search
-- [ ] `GET /health` — status + vector count
-- [ ] Connect to Groq API (Llama 3.1 8B — free)
-- [ ] Test with real questions via curl / Postman
+- [x] Installed `groq`, `fastapi`, `uvicorn` into venv
+- [x] Built `src/rag_api.py` (FastAPI)
+  - [x] `POST /ask` — embed query → retrieve top-5 from Pinecone → prompt → Groq LLM → answer + citations
+  - [x] `POST /ingest` — add new text at runtime, embeds and upserts to Pinecone
+  - [x] `GET /search` — raw chunk search with scores
+  - [x] `GET /health` — status + vector count + model info
+- [x] Connected to Groq API (Llama 3.1 8B — free, ~1s response time)
+- [x] Tested with real questions:
+  - "What did I build at Troy and Banks?" → correct grounded answer with citations
+  - "What are my skills with Kafka and streaming?" → detailed answer citing Project.md
 
 ---
 
@@ -58,3 +69,11 @@
 - [ ] RAGAS evaluation with golden Q&A dataset
 - [ ] Langfuse observability
 - [ ] Deploy to Railway / Render
+
+---
+
+## Known Issues & Planned Improvements
+
+### Retrieval Quality
+- [ ] **Metadata filtering for company/employer names** — query "What did I build at Troy and Banks?" scored low (0.24) because the company name appears in few chunks. Fix: tag each chunk with `employer` metadata during ingestion and filter by it before vector search. This makes employer-specific queries much more precise.
+- [ ] **Hybrid search (BM25 + vector)** — keyword-heavy queries like exact company/project names benefit from BM25 on top of semantic search. Pure vector search misses exact string matches.
